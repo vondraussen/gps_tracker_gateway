@@ -108,5 +108,5 @@ gt06Server.listen(gt06ServerPort, () => {
 });
 
 gps103Server.listen(gps103ServerPort, () => {
-    console.log('started GPS103 gps103Server on port:', gps103ServerPort);
+    console.log('started GPS103 server on port:', gps103ServerPort);
 });
