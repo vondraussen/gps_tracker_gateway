@@ -96,8 +96,11 @@ var gps103Server = net.createServer((client) => {
             client.write(gps103.responseMsg);
         }
         gps103.msgBuffer.forEach(msg => {
-            mqttClient.publish(rootTopic + '/' + gps103.imei +
-                '/pos', JSON.stringify(msg));
+            // only publish msg if GPS103 has a GPS fix
+            if (msg.hasFix) {
+                mqttClient.publish(rootTopic + '/' + gps103.imei +
+                    '/pos', JSON.stringify(msg));
+            }
         });
         gps103.clearMsgBuffer();
     });
