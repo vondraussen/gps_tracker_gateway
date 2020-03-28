@@ -4,6 +4,7 @@ const Gps103 = require('gps103');
 const Mqtt = require('mqtt');
 const net = require('net');
 const fs = require('fs');
+const mysql = require('mysql2');
 
 const gt06ServerPort = process.env.GT06_SERVER_PORT || 64459;
 const gps103ServerPort = process.env.GPS103_SERVER_PORT || 64460;
@@ -15,17 +16,26 @@ const brokerUser = process.env.MQTT_BROKER_USER || 'user';
 const brokerPasswd = process.env.MQTT_BROKER_PASSWD || 'passwd';
 const trustedCaPath = process.env.MQTT_BROKER_CA || '';
 const TRUSTED_CA = fs.readFileSync(trustedCaPath);
+const mysqlHost = process.env.MYSQL_HOST || 'localhost';
+const mysqlUser = process.env.MYSQL_USER || 'user';
+const mysqlPasswd = process.env.MYSQL_PASSWD || 'passwd';
+const mysqlDb = process.env.MYSQL_DB || 'database';
 
-var mqttClient = Mqtt.connect(
-    {
-        host: brokerUrl,
-        port: brokerPort,
-        protocol: mqttProtocol,
-        ca: TRUSTED_CA,
-        username: brokerUser,
-        password: brokerPasswd
-    }
-);
+var db = mysql.createConnection({
+    host: mysqlHost,
+    user: mysqlUser,
+    password: mysqlPasswd,
+    database: mysqlDb
+});
+
+var mqttClient = Mqtt.connect({
+    host: brokerUrl,
+    port: brokerPort,
+    protocol: mqttProtocol,
+    ca: TRUSTED_CA,
+    username: brokerUser,
+    password: brokerPasswd
+});
 
 mqttClient.on('error', (err) => {
     console.error('MQTT Error:', err);
@@ -66,6 +76,10 @@ var gt06Server = net.createServer((client) => {
             } else {
                 mqttClient.publish(rootTopic + '/' + gt06.imei +
                     '/pos', JSON.stringify(msg));
+
+                if(msg.event.string === 'location') {
+                    write2db(msg)
+                }
             }
         });
         gt06.clearMsgBuffer();
@@ -104,7 +118,10 @@ var gps103Server = net.createServer((client) => {
             // only publish msg if GPS103 has a GPS fix
             if (msg.hasFix) {
                 mqttClient.publish(rootTopic + '/' + gps103.imei +
-                    '/pos', JSON.stringify(msg));
+                '/pos', JSON.stringify(msg));
+            }
+            if (msg.hasFix && msg.event.string === 'location') {
+                write2db(msg)
             }
         });
         gps103.clearMsgBuffer();
@@ -118,3 +135,19 @@ gt06Server.listen(gt06ServerPort, () => {
 gps103Server.listen(gps103ServerPort, () => {
     console.log('started GPS103 server on port:', gps103ServerPort);
 });
+
+function write2db(posMsg) {
+    let sql = `INSERT INTO positions(\
+        deviceId, position, latitude, longitude, fixTime, speed, heading)\
+        VALUES(\
+            ${posMsg.imei},"${posMsg.lat},${posMsg.lon}",${posMsg.lat},\
+            ${posMsg.lon},${posMsg.fixTimestamp},${posMsg.speed},\
+            ${posMsg.course}\
+        )`
+    // console.log(sql)
+    db.query(
+        sql,
+        function(err, results, fields) {
+            if(err) console.error(err);
+    });
+}
