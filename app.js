@@ -55,7 +55,7 @@ var gt06Server = net.createServer((client) => {
             console.log('err', e);
             return;
         }
-        console.log(gt06);
+        // console.log(gt06);
         if (gt06.expectsResponse) {
             client.write(gt06.responseMsg);
         }
@@ -96,7 +96,7 @@ var gps103Server = net.createServer((client) => {
             console.log('err', e);
             return;
         }
-        console.log(gps103);
+        // console.log(gps103);
         if (gps103.expectsResponse) {
             client.write(gps103.responseMsg);
         }
