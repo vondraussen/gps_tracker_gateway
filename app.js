@@ -60,8 +60,13 @@ var gt06Server = net.createServer((client) => {
             client.write(gt06.responseMsg);
         }
         gt06.msgBuffer.forEach(msg => {
-            mqttClient.publish(rootTopic + '/' + gt06.imei +
-                '/pos', JSON.stringify(msg));
+            let fixDatetime = new Date(msg.fixTime);
+            if(fixDatetime < msg.parseTime - 3600000) {
+                console.log("Invalid Position!");
+            } else {
+                mqttClient.publish(rootTopic + '/' + gt06.imei +
+                    '/pos', JSON.stringify(msg));
+            }
         });
         gt06.clearMsgBuffer();
     });
