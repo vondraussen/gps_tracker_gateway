@@ -20,6 +20,13 @@ The following environment variables are recognized. If not defined a default wil
 - MQTT_BROKER_CA=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
 - MQTT_BROKER_USER=user
 - MQTT_BROKER_PASSWD=passwd
+- MYSQL_HOST
+- MYSQL_USER
+- MYSQL_PASSWD
+- MYSQL_DB
+- MONGO_DB_USER
+- MONGO_DB_PASSWD
+- MONGO_DB_URL
 
 ## MQTT
 Messages received on the TCP port will be transmitted via MQTT *MQTT_ROOT_TOPIC/IMEI/pos*

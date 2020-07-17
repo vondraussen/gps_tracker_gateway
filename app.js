@@ -5,9 +5,14 @@ const Mqtt = require('mqtt');
 const net = require('net');
 const fs = require('fs');
 const mysql = require('mysql2');
+const mongoose = require('mongoose');
+const Position = require('./model/Position');
 
+// gps tracker vars
 const gt06ServerPort = process.env.GT06_SERVER_PORT || 64459;
 const gps103ServerPort = process.env.GPS103_SERVER_PORT || 64460;
+
+// mqtt vars
 const rootTopic = process.env.MQTT_ROOT_TOPIC || 'tracker';
 const brokerUrl = process.env.MQTT_BROKER_URL || 'localhost';
 const brokerPort = process.env.MQTT_BROKER_PORT || 8883;
@@ -16,17 +21,38 @@ const brokerUser = process.env.MQTT_BROKER_USER || 'user';
 const brokerPasswd = process.env.MQTT_BROKER_PASSWD || 'passwd';
 const trustedCaPath = process.env.MQTT_BROKER_CA || '';
 const TRUSTED_CA = fs.readFileSync(trustedCaPath);
+
+// mysql vars
 const mysqlHost = process.env.MYSQL_HOST || 'localhost';
 const mysqlUser = process.env.MYSQL_USER || 'user';
 const mysqlPasswd = process.env.MYSQL_PASSWD || 'passwd';
 const mysqlDb = process.env.MYSQL_DB || 'database';
 
+// mongodb vars
+const mongoUser = process.env.MONGO_DB_USER || 'user';
+const mongoPw = process.env.MONGO_DB_PASSWD || 'password';
+const mongoUrl = process.env.MONGO_DB_URL || 'url';
+
+// connect to MYSQL DB
 var db = mysql.createConnection({
     host: mysqlHost,
     user: mysqlUser,
     password: mysqlPasswd,
     database: mysqlDb
 });
+
+// connect to mongodb
+mongoose.connect(
+    `mongodb+srv://${mongoUser}:${mongoPw}@${mongoUrl}`,
+    { useNewUrlParser: true, useUnifiedTopology: true },
+    (err) => {
+        if (err) {
+           console.log('connection error to mongodb');
+            exit(1);
+        }
+        console.log('connected to mongodb');
+    }
+);
 
 var mqttClient = Mqtt.connect({
     host: brokerUrl,
@@ -78,7 +104,8 @@ var gt06Server = net.createServer((client) => {
                     '/pos', JSON.stringify(msg));
 
                 if(msg.event.string === 'location') {
-                    write2db(msg)
+                    write2mysql(msg);
+                    write2mongo(msg);
                 }
             }
         });
@@ -121,7 +148,8 @@ var gps103Server = net.createServer((client) => {
                 '/pos', JSON.stringify(msg));
             }
             if (msg.hasFix && msg.event.string === 'location') {
-                write2db(msg)
+                write2mysql(msg);
+                write2mongo(msg);
             }
         });
         gps103.clearMsgBuffer();
@@ -136,7 +164,7 @@ gps103Server.listen(gps103ServerPort, () => {
     console.log('started GPS103 server on port:', gps103ServerPort);
 });
 
-function write2db(posMsg) {
+function write2mysql(posMsg) {
     let sql = `INSERT INTO positions(\
         deviceId, position, latitude, longitude, fixTime, speed, heading)\
         VALUES(\
@@ -150,4 +178,22 @@ function write2db(posMsg) {
         function(err, results, fields) {
             if(err) console.error(err);
     });
+}
+
+async function write2mongo(posMsg) {
+    // create the message object to store
+    const pos = new Position({
+        deviceId: posMsg.imei,
+        fixTime: posMsg.fixTimestamp,
+        lat: posMsg.lat,
+        lon: posMsg.lon,
+        speed: posMsg.speed,
+        course: posMsg.course
+    });
+
+    try {
+        await pos.save();
+    } catch (err) {
+        console.log('mongodb write err:', err);
+    }
 }
