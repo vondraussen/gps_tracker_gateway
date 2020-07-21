@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const positionSchema = new mongoose.Schema({
     deviceId: Number,
-    fixTime: Number,
+    fixTime: { type: Date, default: Date.now },
     lat: Number,
     lon: Number,
     alt: Number,
