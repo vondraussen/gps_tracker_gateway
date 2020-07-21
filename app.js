@@ -185,8 +185,7 @@ async function write2mongo(posMsg) {
     const pos = new Position({
         deviceId: posMsg.imei,
         fixTime: new Date(posMsg.fixTimestamp * 1000),
-        lat: posMsg.lat,
-        lon: posMsg.lon,
+        position: {type: "Point", coordinates: [posMsg.lon, posMsg.lat]},
         speed: posMsg.speed,
         course: posMsg.course
     });
