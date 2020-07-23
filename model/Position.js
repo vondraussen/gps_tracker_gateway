@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const positionSchema = new mongoose.Schema({
-    deviceId: Number,
+    deviceId: String,
     fixTime: {type: Date, default: Date.now},
     position: {
         type: {type: String, enum: ['Point']},
