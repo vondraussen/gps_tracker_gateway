@@ -17,7 +17,7 @@
   ],
   "dependencies": {
     "dotenv": "^8.2.0",
-    "esptracker": "git+https://github.com/vondraussen/esptrackerd.git",
+    "esptracker": "^1.0.0",
     "gps103": "^1.0.4",
     "gt06": "^1.0.4",
     "mongoose": "^5.12.1",
