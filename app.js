@@ -1,4 +1,5 @@
 require('dotenv').config();
+const EspTracker = require('esptracker');
 const Gt06 = require('gt06');
 const Gps103 = require('gps103');
 const Mqtt = require('mqtt');
@@ -9,6 +10,7 @@ const mongoose = require('mongoose');
 const Position = require('./model/Position');
 
 // gps tracker vars
+const espTrackerServerPort = process.env.ESPTRACKER_SERVER_PORT || 64458;
 const gt06ServerPort = process.env.GT06_SERVER_PORT || 64459;
 const gps103ServerPort = process.env.GPS103_SERVER_PORT || 64460;
 
@@ -19,7 +21,7 @@ const brokerPort = process.env.MQTT_BROKER_PORT || 8883;
 const mqttProtocol = process.env.MQTT_BROKER_PROTO || 'mqtt';
 const brokerUser = process.env.MQTT_BROKER_USER || 'user';
 const brokerPasswd = process.env.MQTT_BROKER_PASSWD || 'passwd';
-const trustedCaPath = process.env.MQTT_BROKER_CA || '';
+const trustedCaPath = process.env.MQTT_BROKER_CA || '/etc/ssl/certs/DST_Root_CA_X3.pem';
 const TRUSTED_CA = fs.readFileSync(trustedCaPath);
 
 // mysql vars
@@ -65,6 +67,42 @@ var mqttClient = Mqtt.connect({
 
 mqttClient.on('error', (err) => {
     console.error('MQTT Error:', err);
+});
+
+var espTrackerServer = net.createServer((client) => {
+    var espT = new EspTracker();
+    console.log('client connected');
+
+    espTrackerServer.on('error', (err) => {
+        console.error('espTrackerServer error', err);
+    });
+
+    client.on('error', (err) => {
+        console.error('client error', err);
+    });
+
+    client.on('close', () => {
+        console.log('client disconnected');
+    });
+
+    client.on('data', (data) => {
+        let msg = {};
+        try {
+            msg = espT.parse(data.toString());
+        }
+        catch (e) {
+            console.log('err', e);
+            return;
+        }
+        msg.fixTimestamp = msg.fixTime;
+        // console.log(msg);
+
+        mqttClient.publish(rootTopic + '/' + msg.imei +
+            '/pos', JSON.stringify(msg));
+
+        write2mysql(msg);
+        write2mongo(msg);
+    });
 });
 
 var gt06Server = net.createServer((client) => {
@@ -154,6 +192,10 @@ var gps103Server = net.createServer((client) => {
         });
         gps103.clearMsgBuffer();
     });
+});
+
+espTrackerServer.listen(espTrackerServerPort, () => {
+    console.log('started EspTracker server on port:', espTrackerServerPort);
 });
 
 gt06Server.listen(gt06ServerPort, () => {

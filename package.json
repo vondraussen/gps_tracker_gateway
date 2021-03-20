@@ -17,9 +17,10 @@
   ],
   "dependencies": {
     "dotenv": "^8.2.0",
+    "esptracker": "github:vondraussen/esptrackerd",
     "gps103": "^1.0.4",
     "gt06": "^1.0.4",
-    "mongoose": "^5.10.15",
+    "mongoose": "^5.12.1",
     "mqtt": "^3.0.0",
     "mysql2": "^2.2.5"
   }
