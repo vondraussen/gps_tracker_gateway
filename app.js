@@ -94,7 +94,7 @@ var espTrackerServer = net.createServer((client) => {
             console.log('err', e);
             return;
         }
-        msg.fixTimestamp = msg.fixTime;
+        msg.fixTimestamp = msg.fixTime.getTime()/1000;
         // console.log(msg);
 
         mqttClient.publish(rootTopic + '/' + msg.imei +
