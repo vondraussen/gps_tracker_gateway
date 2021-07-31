@@ -75,7 +75,7 @@ mqttClient.on('error', (err) => {
 
 var espTrackerServer = net.createServer((client) => {
     var espT = new EspTracker();
-    console.log('client connected');
+    console.log(new Date().toISOString(), 'client connected');
 
     espTrackerServer.on('error', (err) => {
         console.error('espTrackerServer error', err);
@@ -86,7 +86,7 @@ var espTrackerServer = net.createServer((client) => {
     });
 
     client.on('close', () => {
-        console.log('client disconnected');
+        console.log(new Date().toISOString(), 'client disconnected');
     });
 
     client.on('data', (data) => {
@@ -111,7 +111,7 @@ var espTrackerServer = net.createServer((client) => {
 
 var gt06Server = net.createServer((client) => {
     var gt06 = new Gt06();
-    console.log('client connected');
+    console.log(new Date().toISOString(), 'client connected');
 
     gt06Server.on('error', (err) => {
         console.error('gt06Server error', err);
@@ -122,7 +122,7 @@ var gt06Server = net.createServer((client) => {
     });
 
     client.on('close', () => {
-        console.log('client disconnected');
+        console.log(new Date().toISOString(), 'client disconnected');
     });
 
     client.on('data', (data) => {
@@ -157,7 +157,7 @@ var gt06Server = net.createServer((client) => {
 
 var gps103Server = net.createServer((client) => {
     var gps103 = new Gps103();
-    console.log('client connected');
+    console.log(new Date().toISOString(), 'client connected');
 
     gps103Server.on('error', (err) => {
         console.error('gps103Server error', err);
@@ -168,7 +168,7 @@ var gps103Server = net.createServer((client) => {
     });
 
     client.on('close', () => {
-        console.log('client disconnected');
+        console.log(new Date().toISOString(), 'client disconnected');
     });
 
     client.on('data', (data) => {
@@ -199,15 +199,15 @@ var gps103Server = net.createServer((client) => {
 });
 
 espTrackerServer.listen(espTrackerServerPort, () => {
-    console.log('started EspTracker server on port:', espTrackerServerPort);
+    console.log(new Date().toISOString(), 'started EspTracker server on port:', espTrackerServerPort);
 });
 
 gt06Server.listen(gt06ServerPort, () => {
-    console.log('started GT06 server on port:', gt06ServerPort);
+    console.log(new Date().toISOString(), 'started GT06 server on port:', gt06ServerPort);
 });
 
 gps103Server.listen(gps103ServerPort, () => {
-    console.log('started GPS103 server on port:', gps103ServerPort);
+    console.log(new Date().toISOString(), 'started GPS103 server on port:', gps103ServerPort);
 });
 
 function write2mysql(posMsg) {
