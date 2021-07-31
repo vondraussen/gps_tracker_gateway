@@ -43,6 +43,10 @@ var db = mysql.createConnection({
     database: mysqlDb
 });
 
+db.on('error', function(err) {
+    console.log('mysql:', err.code, err.fatal);
+});
+
 // connect to mongodb
 mongoose.connect(
     `mongodb+srv://${mongoUser}:${mongoPw}@${mongoUrl}`,
@@ -218,7 +222,7 @@ function write2mysql(posMsg) {
     db.query(
         sql,
         function(err, results, fields) {
-            if(err) console.error(err);
+            if(err) console.error('mysql error:', err);
     });
 }
 
