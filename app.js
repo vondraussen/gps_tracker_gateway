@@ -75,18 +75,18 @@ mqttClient.on('error', (err) => {
 
 var espTrackerServer = net.createServer((client) => {
     var espT = new EspTracker();
-    console.log(new Date().toISOString(), 'client connected');
+    console.log(new Date().toISOString(), 'esp client connected');
 
     espTrackerServer.on('error', (err) => {
         console.error('espTrackerServer error', err);
     });
 
     client.on('error', (err) => {
-        console.error('client error', err);
+        console.error('esp client error', err);
     });
 
     client.on('close', () => {
-        console.log(new Date().toISOString(), 'client disconnected');
+        console.log(new Date().toISOString(), 'esp client disconnected');
     });
 
     client.on('data', (data) => {
@@ -95,7 +95,7 @@ var espTrackerServer = net.createServer((client) => {
             msg = espT.parse(data.toString());
         }
         catch (e) {
-            console.log('err', e);
+            console.log('esp err', e);
             return;
         }
         msg.fixTimestamp = msg.fixTime.getTime()/1000;
@@ -111,18 +111,18 @@ var espTrackerServer = net.createServer((client) => {
 
 var gt06Server = net.createServer((client) => {
     var gt06 = new Gt06();
-    console.log(new Date().toISOString(), 'client connected');
+    console.log(new Date().toISOString(), 'gt06 client connected');
 
     gt06Server.on('error', (err) => {
         console.error('gt06Server error', err);
     });
 
     client.on('error', (err) => {
-        console.error('client error', err);
+        console.error('gt06 client error', err);
     });
 
     client.on('close', () => {
-        console.log(new Date().toISOString(), 'client disconnected');
+        console.log(new Date().toISOString(), 'gt06 client disconnected');
     });
 
     client.on('data', (data) => {
@@ -130,7 +130,7 @@ var gt06Server = net.createServer((client) => {
             gt06.parse(data);
         }
         catch (e) {
-            console.log('err', e);
+            console.log('gt06 err', e);
             return;
         }
         // console.log(gt06);
@@ -140,7 +140,7 @@ var gt06Server = net.createServer((client) => {
         gt06.msgBuffer.forEach(msg => {
             let fixDatetime = new Date(msg.fixTime);
             if(fixDatetime < msg.parseTime - 3600000) {
-                console.log("Invalid Position!");
+                console.log("gt06 Invalid Position!");
             } else {
                 mqttClient.publish(rootTopic + '/' + gt06.imei +
                     '/pos', JSON.stringify(msg));
@@ -157,18 +157,18 @@ var gt06Server = net.createServer((client) => {
 
 var gps103Server = net.createServer((client) => {
     var gps103 = new Gps103();
-    console.log(new Date().toISOString(), 'client connected');
+    console.log(new Date().toISOString(), 'gps103 client connected');
 
     gps103Server.on('error', (err) => {
         console.error('gps103Server error', err);
     });
 
     client.on('error', (err) => {
-        console.error('client error', err);
+        console.error('gps103 client error', err);
     });
 
     client.on('close', () => {
-        console.log(new Date().toISOString(), 'client disconnected');
+        console.log(new Date().toISOString(), 'gps103 client disconnected');
     });
 
     client.on('data', (data) => {
@@ -176,7 +176,7 @@ var gps103Server = net.createServer((client) => {
             gps103.parse(data);
         }
         catch (e) {
-            console.log('err', e);
+            console.log('gps103 err', e);
             return;
         }
         // console.log(gps103);
