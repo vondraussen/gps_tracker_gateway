@@ -75,18 +75,18 @@ mqttClient.on('error', (err) => {
 
 var espTrackerServer = net.createServer((client) => {
     var espT = new EspTracker();
-    console.log(new Date().toISOString(), 'esp client connected');
+    console.log(new Date().toISOString(), 'esp client connected', client.remoteAddress);
 
     espTrackerServer.on('error', (err) => {
         console.error('espTrackerServer error', err);
     });
 
     client.on('error', (err) => {
-        console.error('esp client error', err);
+        console.error('esp client error', client.remoteAddress, err);
     });
 
     client.on('close', () => {
-        console.log(new Date().toISOString(), 'esp client disconnected');
+        console.log(new Date().toISOString(), 'esp client disconnected', client.remoteAddress);
     });
 
     client.on('data', (data) => {
@@ -95,7 +95,7 @@ var espTrackerServer = net.createServer((client) => {
             msg = espT.parse(data.toString());
         }
         catch (e) {
-            console.log('esp err', e);
+            console.log('esp err', client.remoteAddress, e);
             return;
         }
         msg.fixTimestamp = msg.fixTime.getTime()/1000;
@@ -158,18 +158,18 @@ var gt06Server = net.createServer((client) => {
 
 var gps103Server = net.createServer((client) => {
     var gps103 = new Gps103();
-    console.log(new Date().toISOString(), 'gps103 client connected');
+    console.log(new Date().toISOString(), 'gps103 client connected', client.remoteAddress);
 
     gps103Server.on('error', (err) => {
         console.error('gps103Server error', err);
     });
 
     client.on('error', (err) => {
-        console.error('gps103 client error', err);
+        console.error('gps103 client error', client.remoteAddress, err);
     });
 
     client.on('close', () => {
-        console.log(new Date().toISOString(), 'gps103 client disconnected');
+        console.log(new Date().toISOString(), 'gps103 client disconnected', client.remoteAddress);
     });
 
     client.on('data', (data) => {
@@ -177,7 +177,7 @@ var gps103Server = net.createServer((client) => {
             gps103.parse(data);
         }
         catch (e) {
-            console.log('gps103 err', e);
+            console.log('gps103 err', client.remoteAddress, e);
             return;
         }
         // console.log(gps103);
