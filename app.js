@@ -111,18 +111,19 @@ var espTrackerServer = net.createServer((client) => {
 
 var gt06Server = net.createServer((client) => {
     var gt06 = new Gt06();
-    console.log(new Date().toISOString(), 'gt06 client connected');
+    console.log(new Date().toISOString(),
+        'gt06 client connected', client.remoteAddress);
 
     gt06Server.on('error', (err) => {
         console.error('gt06Server error', err);
     });
 
     client.on('error', (err) => {
-        console.error('gt06 client error', err);
+        console.error('gt06 client error', client.remoteAddress, err);
     });
 
     client.on('close', () => {
-        console.log(new Date().toISOString(), 'gt06 client disconnected');
+        console.log(new Date().toISOString(), 'gt06 client disconnected', client.remoteAddress);
     });
 
     client.on('data', (data) => {
@@ -130,7 +131,7 @@ var gt06Server = net.createServer((client) => {
             gt06.parse(data);
         }
         catch (e) {
-            console.log('gt06 err', e);
+            console.log('gt06 err', client.remoteAddress, e);
             return;
         }
         // console.log(gt06);
