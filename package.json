@@ -1,6 +1,6 @@
 {
   "name": "gps_tracker_gateway",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "author": "Andy Hempel",
   "license": "ISC",
   "description": "Server/Gateway to receive and response to GT06 and GPS103 GPS Tracker messages and forward the parsed content via MQTT",
@@ -27,7 +27,7 @@
     "dotenv": ">8.6.0",
     "esptracker": ">=1.0.0",
     "gps103": ">1.0.4",
-    "gt06": "^1.0.7",
+    "gt06": ">=1.0.10",
     "mongoose": "^5.13.5",
     "mqtt": ">3.0.0",
     "mysql2": ">=2.2.5"
